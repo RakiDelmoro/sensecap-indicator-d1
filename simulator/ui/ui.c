@@ -42,3 +42,45 @@ void ui_destroy(void)
 {
     ui_Screen_1_screen_destroy();
 }
+
+// ==================== RUST INTEGRATION ====================
+// These functions are called by Rust to update the UI display
+
+void ui_set_water_level(int level)
+{
+    if(ui_WaterTankArc != NULL && level >= 0 && level <= 100) {
+        lv_arc_set_value(ui_WaterTankArc, level);
+        printf("[UI] Water arc updated to: %d%%\n", level);
+    }
+}
+
+void ui_set_bright_state(int state)
+{
+    if(ui_Bright != NULL) {
+        if(state) {
+            lv_obj_add_state(ui_Bright, LV_STATE_CHECKED);
+            printf("[UI] Bright button state: ON\n");
+        } else {
+            lv_obj_clear_state(ui_Bright, LV_STATE_CHECKED);
+            printf("[UI] Bright button state: OFF\n");
+        }
+    }
+}
+
+void ui_set_relax_state(int state)
+{
+    if(ui_Relax != NULL) {
+        if(state) {
+            lv_obj_add_state(ui_Relax, LV_STATE_CHECKED);
+            printf("[UI] Relax button state: ON\n");
+        } else {
+            lv_obj_clear_state(ui_Relax, LV_STATE_CHECKED);
+            printf("[UI] Relax button state: OFF\n");
+        }
+    }
+}
+
+// ==================== EVENT HANDLERS ====================
+// NOTE: ui_event_Bright and ui_event_Relax are defined in ui_Screen_1.c
+// They call the Rust functions rust_set_bright() and rust_set_relax()
+// when buttons are clicked.

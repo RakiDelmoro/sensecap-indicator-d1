@@ -42,6 +42,10 @@ file(GLOB_RECURSE LVGL_SOURCES
     lvgl/src/*.c
 )
 
+# Rust library path
+set(RUST_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../simulator-backend/target/release)
+set(RUST_LIB ${RUST_LIB_DIR}/libsimulator_backend.a)
+
 # Create executable
 add_executable(sensecap-simulator
     src/main.c
@@ -49,11 +53,24 @@ add_executable(sensecap-simulator
     ${LVGL_SOURCES}
 )
 
+# Ensure Rust library is built before C executable
+add_custom_command(
+    OUTPUT ${RUST_LIB}
+    COMMAND cargo build --release
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../simulator-backend
+    COMMENT "Building Rust simulator-backend library"
+)
+
+add_custom_target(rust_backend DEPENDS ${RUST_LIB})
+add_dependencies(sensecap-simulator rust_backend)
+
 # Link libraries
 target_link_libraries(sensecap-simulator PRIVATE
+    ${RUST_LIB}
     ${SDL2_LIBRARIES}
     m
     pthread
+    dl
 )
 
 # Compiler flags

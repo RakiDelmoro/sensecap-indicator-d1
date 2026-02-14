@@ -1,0 +1,14 @@
+[package]
+name = "simulator-backend"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+log = "0.4"
+rand = "0.8"
+
+[build-dependencies]
+cc = "1.0"

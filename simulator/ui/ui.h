@@ -37,6 +37,24 @@ LV_IMG_DECLARE(ui_img_353436330);    // assets/new-lights-on-removebg-preview.pn
 void ui_init(void);
 void ui_destroy(void);
 
+// RUST FFI FUNCTIONS - Called by C UI, implemented in Rust
+extern void rust_backend_init(void);
+extern void rust_set_bright(int state);
+extern void rust_set_relax(int state);
+extern int rust_get_bright(void);
+extern int rust_get_relax(void);
+extern int rust_toggle_bright(void);
+extern int rust_toggle_relax(void);
+extern int rust_get_water_level(void);
+extern void rust_set_water_level(int level);
+extern int rust_is_water_low(void);
+extern int rust_is_water_critical(void);
+
+// C UI UPDATE FUNCTIONS - Called by Rust to update display
+extern void ui_set_water_level(int level);
+extern void ui_set_bright_state(int state);
+extern void ui_set_relax_state(int state);
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif

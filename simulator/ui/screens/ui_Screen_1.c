@@ -39,6 +39,11 @@ void ui_event_Bright(lv_event_t * e)
 
     if(event_code == LV_EVENT_VALUE_CHANGED) {
         _ui_state_modify(ui_Relax, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        
+        // Call Rust backend
+        bool checked = lv_obj_has_state(ui_Bright, LV_STATE_CHECKED);
+        rust_set_bright(checked ? 1 : 0);
+        printf("[EVENT] Bright clicked, state: %d\n", checked ? 1 : 0);
     }
 }
 
@@ -48,6 +53,11 @@ void ui_event_Relax(lv_event_t * e)
 
     if(event_code == LV_EVENT_VALUE_CHANGED) {
         _ui_state_modify(ui_Bright, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        
+        // Call Rust backend
+        bool checked = lv_obj_has_state(ui_Relax, LV_STATE_CHECKED);
+        rust_set_relax(checked ? 1 : 0);
+        printf("[EVENT] Relax clicked, state: %d\n", checked ? 1 : 0);
     }
 }
 

@@ -119,11 +119,20 @@ int main(int argc, char **argv)
     indev_drv.read_cb = sdl_mouse_read;
     lv_indev_drv_register(&indev_drv);
     
+    /*Initialize Rust Backend + Mock MQTT*/
+    printf("========================================\n");
+    printf("SenseCap Simulator with Rust Backend\n");
+    printf("========================================\n");
+    printf("Initializing Rust backend...\n");
+    rust_backend_init();
+    printf("Backend initialized! MockMQTT running (water level every 5s)\n");
+    printf("========================================\n\n");
+    
     /*Initialize the UI - this calls ui_init() which loads Screen_1*/
     ui_init();
     
-    printf("SenseCap Indicator Simulator started!\n");
     printf("Window size: %dx%d\n", DISP_HOR_RES, DISP_VER_RES);
+    printf("Click buttons to test Rust integration!\n");
     printf("Close window to exit.\n");
     
     /*Main loop*/

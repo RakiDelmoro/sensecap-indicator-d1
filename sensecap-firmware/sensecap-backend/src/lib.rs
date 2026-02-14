@@ -1,9 +1,9 @@
 use log::info;
 use std::sync::Mutex;
 
+pub mod ffi;
 pub mod lights;
 pub mod water;
-pub mod ffi;
 
 /// Light modes for the device
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -17,6 +17,10 @@ pub enum LightMode {
 pub struct Backend {
     pub light_mode: LightMode,
     pub water_level: u8,
+    /// Bright switch: 0 = off, 1 = on
+    pub bright_switch: u8,
+    /// Relax switch: 0 = off, 1 = on
+    pub relax_switch: u8,
 }
 
 impl Default for Backend {
@@ -24,6 +28,8 @@ impl Default for Backend {
         Self {
             light_mode: LightMode::Off,
             water_level: 0,
+            bright_switch: 0,
+            relax_switch: 0,
         }
     }
 }

@@ -1,5 +1,6 @@
 //! Mock MQTT Client - Simulates incoming water level messages
 
+use crate::ffi::ui_update_water_level_async;
 use crate::{water, with_backend};
 use rand::Rng;
 use std::thread;
@@ -22,6 +23,12 @@ pub fn start_subscriber() {
 
             // Update backend
             water::set_level(level);
+
+            // PUSH to C UI - Schedule async update from main LVGL thread
+            unsafe {
+                ui_update_water_level_async(level as i32);
+            }
+            println!("[UI] Water level async update scheduled: {}%", level);
 
             // Get current light states for display
             let (bright, relax) =

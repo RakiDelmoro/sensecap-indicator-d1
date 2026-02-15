@@ -101,12 +101,15 @@ pub extern "C" fn rust_is_water_critical() -> i32 {
 /// These are implemented in C UI and called by Rust
 
 extern "C" {
-    /// Update water arc in C UI
+    /// Update water arc in C UI (LVGL thread only!)
     pub fn ui_set_water_level(level: i32);
 
-    /// Update bright button state in C UI
+    /// Update bright button state in C UI (LVGL thread only!)
     pub fn ui_set_bright_state(state: i32);
 
-    /// Update relax button state in C UI
+    /// Update relax button state in C UI (LVGL thread only!)
     pub fn ui_set_relax_state(state: i32);
+
+    /// Thread-safe async water level update (can be called from any thread)
+    pub fn ui_update_water_level_async(level: i32);
 }

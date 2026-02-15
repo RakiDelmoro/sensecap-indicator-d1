@@ -3,8 +3,39 @@
 // LVGL version: 8.3.11
 // Project name: SquareLine_Project
 
+#include <stdio.h>
 #include "ui.h"
 #include "ui_helpers.h"
+
+// Thread-safe water level update - called from Rust thread
+typedef struct {
+    int level;
+} water_level_data_t;
+
+static water_level_data_t pending_water_level = { -1 };
+
+// LVGL async callback - runs on main LVGL thread
+static void apply_water_level_update(void *data)
+{
+    int level = *(int*)data;
+    
+    if(ui_WaterTankArc != NULL && level >= 0 && level <= 100) {
+        lv_arc_set_value(ui_WaterTankArc, level);
+    }
+    if(ui_WaterLevel != NULL) {
+        char buf[8];
+        lv_snprintf(buf, sizeof(buf), "%d", level);
+        lv_label_set_text(ui_WaterLevel, buf);
+    }
+    printf("[UI] Water level updated to: %d%%\n", level);
+}
+
+// Called by Rust from any thread - schedules async update
+void ui_update_water_level_async(int level)
+{
+    pending_water_level.level = level;
+    lv_async_call(apply_water_level_update, &pending_water_level.level);
+}
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -52,16 +83,22 @@ void ui_set_water_level(int level)
         lv_arc_set_value(ui_WaterTankArc, level);
         printf("[UI] Water arc updated to: %d%%\n", level);
     }
+    if(ui_WaterLevel != NULL) {
+        char buf[8];
+        lv_snprintf(buf, sizeof(buf), "%d", level);
+        lv_label_set_text(ui_WaterLevel, buf);
+        printf("[UI] Water label updated to: %d%%\n", level);
+    }
 }
 
 void ui_set_bright_state(int state)
 {
-    if(ui_Bright != NULL) {
+    if(ui_brightButton != NULL) {
         if(state) {
-            lv_obj_add_state(ui_Bright, LV_STATE_CHECKED);
+            lv_obj_add_state(ui_brightButton, LV_STATE_CHECKED);
             printf("[UI] Bright button state: ON\n");
         } else {
-            lv_obj_clear_state(ui_Bright, LV_STATE_CHECKED);
+            lv_obj_clear_state(ui_brightButton, LV_STATE_CHECKED);
             printf("[UI] Bright button state: OFF\n");
         }
     }
@@ -69,18 +106,13 @@ void ui_set_bright_state(int state)
 
 void ui_set_relax_state(int state)
 {
-    if(ui_Relax != NULL) {
+    if(ui_relaxButton != NULL) {
         if(state) {
-            lv_obj_add_state(ui_Relax, LV_STATE_CHECKED);
+            lv_obj_add_state(ui_relaxButton, LV_STATE_CHECKED);
             printf("[UI] Relax button state: ON\n");
         } else {
-            lv_obj_clear_state(ui_Relax, LV_STATE_CHECKED);
+            lv_obj_clear_state(ui_relaxButton, LV_STATE_CHECKED);
             printf("[UI] Relax button state: OFF\n");
         }
     }
 }
-
-// ==================== EVENT HANDLERS ====================
-// NOTE: ui_event_Bright and ui_event_Relax are defined in ui_Screen_1.c
-// They call the Rust functions rust_set_bright() and rust_set_relax()
-// when buttons are clicked.

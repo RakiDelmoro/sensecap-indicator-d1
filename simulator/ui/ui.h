@@ -30,8 +30,8 @@ extern "C" {
 extern lv_obj_t * ui____initial_actions0;
 
 // IMAGES AND IMAGE SETS
-LV_IMG_DECLARE(ui_img_166333148);    // assets/new-lights-off-removebg-preview.png
-LV_IMG_DECLARE(ui_img_353436330);    // assets/new-lights-on-removebg-preview.png
+LV_IMG_DECLARE(ui_img_129797224);    // assets/resized-off-light.png
+LV_IMG_DECLARE(ui_img_404674758);    // assets/resized-on-light.png
 
 // UI INIT
 void ui_init(void);
@@ -51,9 +51,13 @@ extern int rust_is_water_low(void);
 extern int rust_is_water_critical(void);
 
 // C UI UPDATE FUNCTIONS - Called by Rust to update display
+// NOTE: These must be called from LVGL thread only!
 extern void ui_set_water_level(int level);
 extern void ui_set_bright_state(int state);
 extern void ui_set_relax_state(int state);
+
+// Thread-safe async update - can be called from any thread
+extern void ui_update_water_level_async(int level);
 
 #ifdef __cplusplus
 } /*extern "C"*/

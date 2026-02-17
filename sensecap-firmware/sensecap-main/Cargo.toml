@@ -1,0 +1,19 @@
+[package]
+name = "sensecap-main"
+version = "0.1.0"
+authors = ["Raki Delmoro <rakidelmoro@gmail.com>"]
+edition = "2021"
+rust-version = "1.77"
+
+[[bin]]
+name = "sensecap-firmware"
+path = "src/main.rs"
+
+[dependencies]
+log = { workspace = true }
+anyhow = { workspace = true }
+esp-idf-svc = { workspace = true, features = ["experimental"] }
+sensecap-backend = { path = "../sensecap-backend" }
+
+[build-dependencies]
+embuild = { version = "0.33", features = ["espidf"] }

@@ -1,0 +1,80 @@
+# Rust build artifacts
+**/target/
+**/*.rs.bk
+**/Cargo.lock
+
+# ESP-IDF build cache
+**/.embuild/
+*.o
+*.a
+
+# Simulator build artifacts
+/simulator/build/
+/simulator/cmake-build-*/
+/simulator/CMakeCache.txt
+/simulator/CMakeFiles/
+/simulator/Makefile
+/simulator/*.cmake
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# WSL files
+*.exe
+*.dll
+
+# Clangd cache
+.clangd
+
+# Keep these important files
+!/.gitignore
+!/simulator/CMakeLists.txt
+!/simulator/lv_conf.h
+!/simulator/build.sh
+!/simulator/README.md
+!/simulator/src/*.c
+!/simulator/src/*.h
+!/simulator/ui/**/*.c
+!/simulator/ui/**/*.h
+
+# Keep sensecap-firmware workspace files
+!/sensecap-firmware/Cargo.toml
+!/sensecap-firmware/build.rs
+!/sensecap-firmware/Cargo.toml.backup
+!/sensecap-firmware/.cargo/config.toml
+!/sensecap-firmware/.github/workflows/*.yml
+
+# Keep sensecap-main (main application)
+!/sensecap-firmware/sensecap-main/Cargo.toml
+!/sensecap-firmware/sensecap-main/build.rs
+!/sensecap-firmware/sensecap-main/src/**/*.rs
+!/sensecap-firmware/sensecap-main/lv_conf.h
+!/sensecap-firmware/sensecap-main/sdkconfig.defaults
+
+# Keep sensecap-backend (Rust backend library)
+!/sensecap-firmware/sensecap-backend/Cargo.toml
+!/sensecap-firmware/sensecap-backend/src/**/*.rs
+
+# Keep sensecap-ui (C UI files)
+!/sensecap-firmware/sensecap-ui/CMakeLists.txt
+!/sensecap-firmware/sensecap-ui/**/*.c
+!/sensecap-firmware/sensecap-ui/**/*.h
+
+# Documentation
+*.md
+!README.md
+!**/README.md

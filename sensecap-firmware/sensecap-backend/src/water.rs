@@ -1,8 +1,12 @@
+use crate::ffi::trigger_ui_update;
 use crate::with_backend;
 use log::info;
 
 /// Maximum water level
 pub const MAX_WATER_LEVEL: u8 = 100;
+
+/// MQTT topic for water level
+pub const MQTT_TOPIC_WATER: &str = "sensecap/water/level";
 
 /// Get current water level
 pub fn get_level() -> Option<u8> {
@@ -16,6 +20,8 @@ pub fn set_level(level: u8) {
         backend.water_level = clamped;
         info!("Water level set to {}%", clamped);
     });
+    // Trigger UI update callback
+    trigger_ui_update();
 }
 
 /// Read water level from sensor

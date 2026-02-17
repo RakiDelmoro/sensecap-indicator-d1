@@ -3,6 +3,7 @@ use std::sync::Mutex;
 
 pub mod ffi;
 pub mod lights;
+pub mod mqtt;
 pub mod water;
 
 /// Light modes for the device

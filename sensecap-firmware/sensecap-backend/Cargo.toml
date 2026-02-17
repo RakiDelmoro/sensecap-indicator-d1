@@ -10,3 +10,4 @@ crate-type = ["staticlib", "rlib"]
 [dependencies]
 log = { workspace = true }
 anyhow = { workspace = true }
+esp-idf-svc = { workspace = true, features = ["experimental"] }

@@ -1,5 +1,9 @@
+use crate::ffi::trigger_ui_update;
 use crate::with_backend;
 use log::info;
+
+/// MQTT topic for publishing light state
+pub const MQTT_TOPIC_LIGHTS: &str = "sensecap/lights/state";
 
 /// Set bright switch state (0 = off, 1 = on)
 pub fn set_bright(state: u8) {
@@ -15,6 +19,8 @@ pub fn set_bright(state: u8) {
         }
         info!("Bright switch set to: {}", clamped);
     });
+    // Trigger UI update callback
+    trigger_ui_update();
 }
 
 /// Set relax switch state (0 = off, 1 = on)
@@ -31,6 +37,8 @@ pub fn set_relax(state: u8) {
         }
         info!("Relax switch set to: {}", clamped);
     });
+    // Trigger UI update callback
+    trigger_ui_update();
 }
 
 /// Get bright switch state (0 or 1)

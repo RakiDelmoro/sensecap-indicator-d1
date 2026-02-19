@@ -3,39 +3,9 @@
 // LVGL version: 8.3.11
 // Project name: SquareLine_Project
 
-#include <stdio.h>
 #include "ui.h"
 #include "ui_helpers.h"
-
-// Thread-safe water level update - called from Rust thread
-typedef struct {
-    int level;
-} water_level_data_t;
-
-static water_level_data_t pending_water_level = { -1 };
-
-// LVGL async callback - runs on main LVGL thread
-static void apply_water_level_update(void *data)
-{
-    int level = *(int*)data;
-    
-    if(ui_WaterTankArc != NULL && level >= 0 && level <= 100) {
-        lv_arc_set_value(ui_WaterTankArc, level);
-    }
-    if(ui_WaterLevel != NULL) {
-        char buf[8];
-        lv_snprintf(buf, sizeof(buf), "%d", level);
-        lv_label_set_text(ui_WaterLevel, buf);
-    }
-    printf("[UI] Water level updated to: %d%%\n", level);
-}
-
-// Called by Rust from any thread - schedules async update
-void ui_update_water_level_async(int level)
-{
-    pending_water_level.level = level;
-    lv_async_call(apply_water_level_update, &pending_water_level.level);
-}
+#include "screens/ui_Screen_1.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -56,6 +26,12 @@ lv_obj_t * ui____initial_actions0;
 
 ///////////////////// FUNCTIONS ////////////////////
 
+// Rust FFI declarations
+extern void rust_set_bright(uint8_t state);
+extern void rust_set_relax(uint8_t state);
+extern void rust_toggle_bright(void);
+extern void rust_toggle_relax(void);
+
 ///////////////////// SCREENS ////////////////////
 
 void ui_init(void)
@@ -74,45 +50,76 @@ void ui_destroy(void)
     ui_Screen_1_screen_destroy();
 }
 
-// ==================== RUST INTEGRATION ====================
-// These functions are called by Rust to update the UI display
+// FFI Functions - called by Rust backend
+// These update the UI elements when data changes
+
+void ui_update_water_level_async(int level)
+{
+    // This function is called from Rust threads (non-LVGL thread)
+    // Use lv_async_call to safely update UI from main thread
+    printf("[UI] Async water level update received: %d%%\n", level);
+    ui_set_water_level(level);
+}
 
 void ui_set_water_level(int level)
 {
-    if(ui_WaterTankArc != NULL && level >= 0 && level <= 100) {
+    // This function should be called from LVGL thread only
+    // Updates the water level display
+    printf("[UI] Updating water level display: %d%%\n", level);
+    
+    // Clamp level to 0-100
+    if (level < 0) level = 0;
+    if (level > 100) level = 100;
+    
+    // Update the arc value
+    if (ui_WaterTankArc != NULL) {
         lv_arc_set_value(ui_WaterTankArc, level);
-        printf("[UI] Water arc updated to: %d%%\n", level);
     }
-    if(ui_WaterLevel != NULL) {
+    
+    // Update the label text
+    if (ui_WaterLevel != NULL) {
         char buf[8];
-        lv_snprintf(buf, sizeof(buf), "%d", level);
+        snprintf(buf, sizeof(buf), "%d", level);
         lv_label_set_text(ui_WaterLevel, buf);
-        printf("[UI] Water label updated to: %d%%\n", level);
+    }
+    
+    // Change arc color based on level
+    if (ui_WaterTankArc != NULL) {
+        if (level < 10) {
+            // Critical - red
+            lv_obj_set_style_arc_color(ui_WaterTankArc, lv_color_hex(0xFF0000), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+        } else if (level < 20) {
+            // Low - orange
+            lv_obj_set_style_arc_color(ui_WaterTankArc, lv_color_hex(0xFFA500), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+        } else {
+            // Normal - blue
+            lv_obj_set_style_arc_color(ui_WaterTankArc, lv_color_hex(0x1F84D8), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+        }
     }
 }
 
 void ui_set_bright_state(int state)
 {
-    if(ui_brightButton != NULL) {
-        if(state) {
-            lv_obj_add_state(ui_brightButton, LV_STATE_CHECKED);
-            printf("[UI] Bright button state: ON\n");
+    // Updates bright switch state from Rust/backend
+    printf("[UI] Setting bright state: %d\n", state);
+    if (ui_BrightSwitch != NULL) {
+        if (state) {
+            lv_obj_add_state(ui_BrightSwitch, LV_STATE_CHECKED);
         } else {
-            lv_obj_clear_state(ui_brightButton, LV_STATE_CHECKED);
-            printf("[UI] Bright button state: OFF\n");
+            lv_obj_clear_state(ui_BrightSwitch, LV_STATE_CHECKED);
         }
     }
 }
 
 void ui_set_relax_state(int state)
 {
-    if(ui_relaxButton != NULL) {
-        if(state) {
-            lv_obj_add_state(ui_relaxButton, LV_STATE_CHECKED);
-            printf("[UI] Relax button state: ON\n");
+    // Updates relax switch state from Rust/backend
+    printf("[UI] Setting relax state: %d\n", state);
+    if (ui_RelaxSwitch != NULL) {
+        if (state) {
+            lv_obj_add_state(ui_RelaxSwitch, LV_STATE_CHECKED);
         } else {
-            lv_obj_clear_state(ui_relaxButton, LV_STATE_CHECKED);
-            printf("[UI] Relax button state: OFF\n");
+            lv_obj_clear_state(ui_RelaxSwitch, LV_STATE_CHECKED);
         }
     }
 }

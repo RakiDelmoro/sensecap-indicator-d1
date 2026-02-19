@@ -3,10 +3,14 @@
 // LVGL version: 8.3.11
 // Project name: SquareLine_Project
 
-#include <stdio.h>
 #include "../ui.h"
 
-lv_obj_t * uic_relaxButton;
+// Rust FFI declarations
+extern void rust_set_bright(uint8_t state);
+extern void rust_set_relax(uint8_t state);
+extern void rust_toggle_bright(void);
+extern void rust_toggle_relax(void);
+
 lv_obj_t * uic_BrightButtonPanel;
 lv_obj_t * uic_WaterLevel;
 lv_obj_t * uic_WaterTankArc;
@@ -19,6 +23,7 @@ lv_obj_t * ui_LightContainer = NULL;
 lv_obj_t * ui_WaterTankArc = NULL;
 lv_obj_t * ui_LightsText = NULL;
 lv_obj_t * ui_LightsText2 = NULL;
+lv_obj_t * ui_Image1 = NULL;
 lv_obj_t * ui_Panel1 = NULL;
 lv_obj_t * ui_WaterLevel = NULL;
 lv_obj_t * ui_BrightButtonPanel = NULL;
@@ -30,9 +35,46 @@ lv_obj_t * ui_Label2 = NULL;
 lv_obj_t * ui_Panel5 = NULL;
 lv_obj_t * ui_Panel6 = NULL;
 lv_obj_t * ui_Panel7 = NULL;
-lv_obj_t * ui_brightButton = NULL;
-lv_obj_t * ui_relaxButton = NULL;
+lv_obj_t * ui_RelaxSwitch = NULL;
+lv_obj_t * ui_BrightSwitch = NULL;
 // event funtions
+void ui_event_RelaxSwitch(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        uint8_t state = lv_obj_has_state(target, LV_STATE_CHECKED) ? 1 : 0;
+        printf("[UI] Relax switch changed: %d\n", state);
+        
+        // Update UI mutual exclusion
+        if(state) {
+            _ui_state_modify(ui_BrightSwitch, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        }
+        
+        // Call Rust backend to publish to MQTT
+        rust_set_relax(state);
+    }
+}
+
+void ui_event_BrightSwitch(lv_event_t * e)
+{
+    lv_event_code_t event_code = lv_event_get_code(e);
+    lv_obj_t * target = lv_event_get_target(e);
+
+    if(event_code == LV_EVENT_VALUE_CHANGED) {
+        uint8_t state = lv_obj_has_state(target, LV_STATE_CHECKED) ? 1 : 0;
+        printf("[UI] Bright switch changed: %d\n", state);
+        
+        // Update UI mutual exclusion
+        if(state) {
+            _ui_state_modify(ui_RelaxSwitch, LV_STATE_CHECKED, _UI_MODIFY_STATE_REMOVE);
+        }
+        
+        // Call Rust backend to publish to MQTT
+        rust_set_bright(state);
+    }
+}
 
 // build funtions
 
@@ -139,6 +181,16 @@ void ui_Screen_1_screen_init(void)
     lv_obj_set_style_bg_opa(ui_LightsText2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_color(ui_LightsText2, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_LightsText2, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    ui_Image1 = lv_img_create(ui_Screen_1);
+    lv_obj_set_width(ui_Image1, LV_SIZE_CONTENT);   /// 408
+    lv_obj_set_height(ui_Image1, LV_SIZE_CONTENT);    /// 612
+    lv_obj_set_x(ui_Image1, 197);
+    lv_obj_set_y(ui_Image1, 482);
+    lv_obj_set_align(ui_Image1, LV_ALIGN_CENTER);
+    lv_obj_add_flag(ui_Image1, LV_OBJ_FLAG_ADV_HITTEST);     /// Flags
+    lv_obj_clear_flag(ui_Image1, LV_OBJ_FLAG_SCROLLABLE);      /// Flags
+    lv_obj_set_style_transform_zoom(ui_Image1, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     ui_Panel1 = lv_obj_create(ui_Screen_1);
     lv_obj_set_width(ui_Panel1, 100);
@@ -274,41 +326,44 @@ void ui_Screen_1_screen_init(void)
     lv_obj_set_style_border_color(ui_Panel7, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_border_opa(ui_Panel7, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_brightButton = lv_imgbtn_create(ui_Screen_1);
-    lv_imgbtn_set_src(ui_brightButton, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_129797224, NULL);
-    lv_imgbtn_set_src(ui_brightButton, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_129797224, NULL);
-    lv_imgbtn_set_src(ui_brightButton, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &ui_img_404674758, NULL);
-    lv_imgbtn_set_src(ui_brightButton, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &ui_img_404674758, NULL);
-    lv_obj_set_width(ui_brightButton, 474);
-    lv_obj_set_height(ui_brightButton, 398);
-    lv_obj_set_x(ui_brightButton, 50);
-    lv_obj_set_y(ui_brightButton, 83);
-    lv_obj_set_align(ui_brightButton, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_brightButton, LV_OBJ_FLAG_CHECKABLE);     /// Flags
-    lv_obj_set_style_transform_zoom(ui_brightButton, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_img_src(ui_brightButton, &ui_img_404674758, LV_PART_MAIN | LV_STATE_CHECKED);
+    ui_RelaxSwitch = lv_switch_create(ui_Screen_1);
+    lv_obj_set_width(ui_RelaxSwitch, 93);
+    lv_obj_set_height(ui_RelaxSwitch, 40);
+    lv_obj_set_x(ui_RelaxSwitch, 139);
+    lv_obj_set_y(ui_RelaxSwitch, -76);
+    lv_obj_set_align(ui_RelaxSwitch, LV_ALIGN_CENTER);
+    lv_obj_set_style_bg_color(ui_RelaxSwitch, lv_color_hex(0xAAAAAA), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_RelaxSwitch, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-    ui_relaxButton = lv_imgbtn_create(ui_Screen_1);
-    lv_imgbtn_set_src(ui_relaxButton, LV_IMGBTN_STATE_RELEASED, NULL, &ui_img_129797224, NULL);
-    lv_imgbtn_set_src(ui_relaxButton, LV_IMGBTN_STATE_PRESSED, NULL, &ui_img_129797224, NULL);
-    lv_imgbtn_set_src(ui_relaxButton, LV_IMGBTN_STATE_CHECKED_PRESSED, NULL, &ui_img_404674758, NULL);
-    lv_imgbtn_set_src(ui_relaxButton, LV_IMGBTN_STATE_CHECKED_RELEASED, NULL, &ui_img_404674758, NULL);
-    lv_obj_set_width(ui_relaxButton, 474);
-    lv_obj_set_height(ui_relaxButton, 398);
-    lv_obj_set_x(ui_relaxButton, 327);
-    lv_obj_set_y(ui_relaxButton, 82);
-    lv_obj_set_align(ui_relaxButton, LV_ALIGN_CENTER);
-    lv_obj_add_flag(ui_relaxButton, LV_OBJ_FLAG_CHECKABLE);     /// Flags
-    lv_obj_set_style_transform_zoom(ui_relaxButton, 50, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_bg_img_src(ui_relaxButton, &ui_img_404674758, LV_PART_MAIN | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(ui_RelaxSwitch, lv_color_hex(0xFFF800), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_opa(ui_RelaxSwitch, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
 
+    lv_obj_set_style_bg_color(ui_RelaxSwitch, lv_color_hex(0x000000), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_RelaxSwitch, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+
+    ui_BrightSwitch = lv_switch_create(ui_Screen_1);
+    lv_obj_set_width(ui_BrightSwitch, 93);
+    lv_obj_set_height(ui_BrightSwitch, 40);
+    lv_obj_set_x(ui_BrightSwitch, -134);
+    lv_obj_set_y(ui_BrightSwitch, -76);
+    lv_obj_set_align(ui_BrightSwitch, LV_ALIGN_CENTER);
+    lv_obj_set_style_bg_color(ui_BrightSwitch, lv_color_hex(0xAAAAAA), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_BrightSwitch, 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_bg_color(ui_BrightSwitch, lv_color_hex(0xFFF800), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_opa(ui_BrightSwitch, 255, LV_PART_INDICATOR | LV_STATE_CHECKED);
+
+    lv_obj_set_style_bg_color(ui_BrightSwitch, lv_color_hex(0x000000), LV_PART_KNOB | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(ui_BrightSwitch, 255, LV_PART_KNOB | LV_STATE_DEFAULT);
+
+    lv_obj_add_event_cb(ui_RelaxSwitch, ui_event_RelaxSwitch, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_BrightSwitch, ui_event_BrightSwitch, LV_EVENT_ALL, NULL);
     uic_Screen_1 = ui_Screen_1;
     uic_ArcContainer = ui_ArcContainer;
     uic_LightContainer = ui_LightContainer;
     uic_WaterTankArc = ui_WaterTankArc;
     uic_WaterLevel = ui_WaterLevel;
     uic_BrightButtonPanel = ui_BrightButtonPanel;
-    uic_relaxButton = ui_relaxButton;
 
 }
 
@@ -327,6 +382,7 @@ void ui_Screen_1_screen_destroy(void)
     ui_WaterTankArc = NULL;
     ui_LightsText = NULL;
     ui_LightsText2 = NULL;
+    ui_Image1 = NULL;
     ui_Panel1 = NULL;
     uic_WaterLevel = NULL;
     ui_WaterLevel = NULL;
@@ -340,8 +396,7 @@ void ui_Screen_1_screen_destroy(void)
     ui_Panel5 = NULL;
     ui_Panel6 = NULL;
     ui_Panel7 = NULL;
-    ui_brightButton = NULL;
-    uic_relaxButton = NULL;
-    ui_relaxButton = NULL;
+    ui_RelaxSwitch = NULL;
+    ui_BrightSwitch = NULL;
 
 }

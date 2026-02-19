@@ -1,11 +1,18 @@
 {
-    "name": "rust-esp-examples",
-    "image": "espressif/idf-rust:all_latest",
+    "name": "sensecap-indicator-d1",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
     "customizations": {
         "vscode": {
-            "extensions": ["rust-lang.rust-analyzer"]
+            "extensions": [
+                "ms-vscode.cpptools",
+                "espressif.esp-idf-extension"
+            ]
         }
     },
     "runArgs": ["--privileged", "--device=/dev/ttyUSB0"],
-    "forwardPorts": [3000]
+    "forwardPorts": [3000],
+    "postCreateCommand": "echo 'ESP-IDF devcontainer ready. Run ./build-in-devcontainer.sh to build.'"
 }

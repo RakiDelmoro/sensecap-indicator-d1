@@ -26,7 +26,6 @@ include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/ui
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/screens
     ${CMAKE_CURRENT_SOURCE_DIR}/ui/components
-    ${CMAKE_CURRENT_SOURCE_DIR}/ui/images
 )
 
 # Collect UI source files
@@ -34,7 +33,6 @@ file(GLOB UI_SOURCES
     ui/*.c
     ui/screens/*.c
     ui/components/*.c
-    ui/images/*.c
 )
 
 # Collect LVGL source files
@@ -53,16 +51,19 @@ add_executable(sensecap-simulator
     ${LVGL_SOURCES}
 )
 
-# Ensure Rust library is built before C executable
-add_custom_command(
-    OUTPUT ${RUST_LIB}
-    COMMAND cargo build --release
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../simulator-backend
-    COMMENT "Building Rust simulator-backend library"
-)
-
-add_custom_target(rust_backend DEPENDS ${RUST_LIB})
-add_dependencies(sensecap-simulator rust_backend)
+# Ensure Rust library is built before C executable - only build if not present
+if(NOT EXISTS ${RUST_LIB})
+    add_custom_command(
+        OUTPUT ${RUST_LIB}
+        COMMAND /bin/bash -c "export PATH=/home/esp/.cargo/bin:\$PATH && cargo build --release"
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../simulator-backend
+        COMMENT "Building Rust simulator-backend library"
+    )
+    add_custom_target(rust_backend DEPENDS ${RUST_LIB})
+    add_dependencies(sensecap-simulator rust_backend)
+else()
+    message(STATUS "Rust library already exists: ${RUST_LIB}")
+endif()
 
 # Link libraries
 target_link_libraries(sensecap-simulator PRIVATE

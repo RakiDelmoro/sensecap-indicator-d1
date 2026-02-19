@@ -1,0 +1,36 @@
+# ESP-IDF build artifacts
+build/
+sdkconfig
+sdkconfig.old
+*.o
+*.a
+*.elf
+*.bin
+*.map
+
+# Rust build artifacts
+rust-backend/target/
+*.rlib
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Debug
+debug/
+
+# Partition table backups
+*.csv.bak

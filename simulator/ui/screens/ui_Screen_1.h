@@ -19,6 +19,7 @@ extern lv_obj_t * ui_LightContainer;
 extern lv_obj_t * ui_WaterTankArc;
 extern lv_obj_t * ui_LightsText;
 extern lv_obj_t * ui_LightsText2;
+extern lv_obj_t * ui_Image1;
 extern lv_obj_t * ui_Panel1;
 extern lv_obj_t * ui_WaterLevel;
 extern lv_obj_t * ui_BrightButtonPanel;
@@ -30,8 +31,10 @@ extern lv_obj_t * ui_Label2;
 extern lv_obj_t * ui_Panel5;
 extern lv_obj_t * ui_Panel6;
 extern lv_obj_t * ui_Panel7;
-extern lv_obj_t * ui_brightButton;
-extern lv_obj_t * ui_relaxButton;
+extern void ui_event_RelaxSwitch(lv_event_t * e);
+extern lv_obj_t * ui_RelaxSwitch;
+extern void ui_event_BrightSwitch(lv_event_t * e);
+extern lv_obj_t * ui_BrightSwitch;
 // CUSTOM VARIABLES
 extern lv_obj_t * uic_Screen_1;
 extern lv_obj_t * uic_ArcContainer;
@@ -39,7 +42,6 @@ extern lv_obj_t * uic_LightContainer;
 extern lv_obj_t * uic_WaterTankArc;
 extern lv_obj_t * uic_WaterLevel;
 extern lv_obj_t * uic_BrightButtonPanel;
-extern lv_obj_t * uic_relaxButton;
 
 #ifdef __cplusplus
 } /*extern "C"*/

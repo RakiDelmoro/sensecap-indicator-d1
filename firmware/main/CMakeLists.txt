@@ -1,0 +1,28 @@
+idf_component_register(
+    SRCS 
+        "main.c"
+        "display_driver.c"
+        "touch_driver.c"
+        "wifi_manager.c"
+        "backend/backend.c"
+        "../ui/ui.c"
+        "../ui/ui_helpers.c"
+        "../ui/ui_theme_manager.c"
+        "../ui/ui_themes.c"
+        "../ui/screens/ui_Screen_1.c"
+    INCLUDE_DIRS 
+        "."
+        "backend"
+        "../ui"
+        "../ui/screens"
+        "../ui/components"
+    REQUIRES 
+        lvgl
+        esp_wifi
+        esp_netif
+        mqtt
+        nvs_flash
+        spi_flash
+        driver
+        esp_lcd
+)

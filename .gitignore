@@ -1,80 +1,156 @@
-# Rust build artifacts
+# ============================================================================
+# SenseCAP Indicator D1 Firmware - .gitignore
+# ============================================================================
+
+# --- SECURITY: Never commit credentials ---
+# Copy sdkconfig.defaults.template to sdkconfig.defaults and edit with your credentials
+firmware/sdkconfig.defaults
+!firmware/sdkconfig.defaults.template
+
+# --- ESP-IDF Build Artifacts ---
+firmware/build/
+firmware/sdkconfig
+firmware/sdkconfig.old
+firmware/sdkconfig.debug
+firmware/sdkconfig.release
+firmware/dependencies.lock
+firmware/managed_components/
+
+# --- ESP-IDF Binary outputs ---
+**/*.bin
+**/*.elf
+**/*.map
+**/*.sym
+**/*.dis
+
+# --- Rust Build Artifacts ---
 **/target/
 **/*.rs.bk
-**/Cargo.lock
+firmware/rust-backend/Cargo.lock
+firmware/rust-backend/target/
 
-# ESP-IDF build cache
-**/.embuild/
-*.o
-*.a
+# --- C/C++ Build Artifacts ---
+**/*.o
+**/*.a
+**/*.so
+**/*.dylib
+**/CMakeCache.txt
+**/CMakeFiles/
+**/cmake-build-*/
+**/Makefile
+**/*.cmake
+**/*.make
 
-# Simulator build artifacts
-/simulator/build/
-/simulator/cmake-build-*/
-/simulator/CMakeCache.txt
-/simulator/CMakeFiles/
-/simulator/Makefile
-/simulator/*.cmake
-
-# IDE files
+# --- IDE Files ---
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+*.sublime-*
+*.code-workspace
 
-# OS files
+# --- OS Files ---
 .DS_Store
 Thumbs.db
 desktop.ini
+*.lnk
 
-# Temporary files
+# --- Temporary/Log Files ---
 *.tmp
 *.temp
 *.log
+*.bak
+*.backup
 
-# WSL files
+# --- WSL/Windows Artifacts ---
 *.exe
 *.dll
+*.pdb
 
-# Clangd cache
-.clangd
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
 
-# Keep these important files
+# --- Clangd/Language Server ---
+.clangd/
+.cache/
+compile_commands.json
+
+# --- Simulator Build (if present) ---
+simulator/build/
+simulator/cmake-build-*/
+simulator/CMakeCache.txt
+simulator/CMakeFiles/
+simulator/Makefile
+simulator/*.cmake
+
+# --- Documentation Generation ---
+docs/_build/
+docs/api/
+*.html.pdf
+
+# --- Flash/Dump Files (may contain sensitive data) ---
+*.dump
+*.core
+*.rom
+*.flash
+
+# --- Keep Important Project Files ---
 !/.gitignore
-!/simulator/CMakeLists.txt
-!/simulator/lv_conf.h
-!/simulator/build.sh
-!/simulator/README.md
-!/simulator/src/*.c
-!/simulator/src/*.h
-!/simulator/ui/**/*.c
-!/simulator/ui/**/*.h
+!/.github/
+!/.devcontainer/
+!/README.md
+!/LICENSE
+!/CONTRIBUTING.md
 
-# Keep sensecap-firmware workspace files
-!/sensecap-firmware/Cargo.toml
-!/sensecap-firmware/build.rs
-!/sensecap-firmware/Cargo.toml.backup
-!/sensecap-firmware/.cargo/config.toml
-!/sensecap-firmware/.github/workflows/*.yml
+# --- Keep Source Files ---
+!**/*.c
+!**/*.h
+!**/*.cpp
+!**/*.hpp
+!**/*.rs
+!**/*.toml
 
-# Keep sensecap-main (main application)
-!/sensecap-firmware/sensecap-main/Cargo.toml
-!/sensecap-firmware/sensecap-main/build.rs
-!/sensecap-firmware/sensecap-main/src/**/*.rs
-!/sensecap-firmware/sensecap-main/lv_conf.h
-!/sensecap-firmware/sensecap-main/sdkconfig.defaults
+# --- Keep Configuration Templates ---
+!**/sdkconfig.defaults.template
+!**/Kconfig*
+!**/CMakeLists.txt
+!**/partitions.csv
 
-# Keep sensecap-backend (Rust backend library)
-!/sensecap-firmware/sensecap-backend/Cargo.toml
-!/sensecap-firmware/sensecap-backend/src/**/*.rs
+# --- Keep Documentation ---
+!**/*.md
 
-# Keep sensecap-ui (C UI files)
-!/sensecap-firmware/sensecap-ui/CMakeLists.txt
-!/sensecap-firmware/sensecap-ui/**/*.c
-!/sensecap-firmware/sensecap-ui/**/*.h
+# --- Keep Build Scripts ---
+!**/build.sh
+!**/flash.sh
+!**/monitor.sh
+!**/build-*.sh
 
-# Documentation
-*.md
-!README.md
-!**/README.md
+# --- Keep LVGL Config ---
+!**/lv_conf.h
+!**/lvgl_conf.h
+
+# --- Ignore downloaded dependencies ---
+esp-idf/
+esp-matter/
+
+# --- Ignore user-specific files ---
+*.user
+*.local
+.env
+.env.local
+
+# --- Ignore opencode config with API keys ---
+opencode.json
+opencode.json.local
+
+# ============================================================================
+# END OF .gitignore
+# ============================================================================

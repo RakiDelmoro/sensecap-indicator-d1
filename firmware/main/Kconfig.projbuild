@@ -1,0 +1,40 @@
+menu "SenseCAP Indicator Configuration"
+
+    config WIFI_SSID
+        string "WiFi SSID"
+        default "your_wifi_ssid"
+        help
+            SSID (network name) to connect to.
+
+    config WIFI_PASSWORD
+        string "WiFi Password"
+        default "your_wifi_password"
+        help
+            WiFi password (WPA or WPA2) to use.
+
+    config WIFI_MAXIMUM_RETRY
+        int "WiFi Maximum Retry"
+        default 5
+        help
+            Maximum number of WiFi connection retry attempts.
+
+    config MQTT_BROKER_URL
+        string "MQTT Broker URL"
+        default "mqtt://broker.hivemq.com:1883"
+        help
+            URL of the MQTT broker to connect to.
+            Format: mqtt://broker:port or mqtts://broker:port for TLS
+
+    config MQTT_USERNAME
+        string "MQTT Username"
+        default ""
+        help
+            Username for MQTT authentication (optional).
+
+    config MQTT_PASSWORD
+        string "MQTT Password"
+        default ""
+        help
+            Password for MQTT authentication (optional).
+
+endmenu

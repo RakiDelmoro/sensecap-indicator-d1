@@ -10,6 +10,7 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
 #include "lvgl/lvgl.h"
 
 #include "ui_helpers.h"
@@ -29,35 +30,15 @@ extern "C" {
 
 extern lv_obj_t * ui____initial_actions0;
 
-// IMAGES AND IMAGE SETS
-LV_IMG_DECLARE(ui_img_129797224);    // assets/resized-off-light.png
-LV_IMG_DECLARE(ui_img_404674758);    // assets/resized-on-light.png
-
 // UI INIT
 void ui_init(void);
 void ui_destroy(void);
 
-// RUST FFI FUNCTIONS - Called by C UI, implemented in Rust
-extern void rust_backend_init(void);
-extern void rust_set_bright(int state);
-extern void rust_set_relax(int state);
-extern int rust_get_bright(void);
-extern int rust_get_relax(void);
-extern int rust_toggle_bright(void);
-extern int rust_toggle_relax(void);
-extern int rust_get_water_level(void);
-extern void rust_set_water_level(int level);
-extern int rust_is_water_low(void);
-extern int rust_is_water_critical(void);
-
-// C UI UPDATE FUNCTIONS - Called by Rust to update display
-// NOTE: These must be called from LVGL thread only!
-extern void ui_set_water_level(int level);
-extern void ui_set_bright_state(int state);
-extern void ui_set_relax_state(int state);
-
-// Thread-safe async update - can be called from any thread
-extern void ui_update_water_level_async(int level);
+// FFI Functions - called by Rust backend
+void ui_update_water_level_async(int level);
+void ui_set_water_level(int level);
+void ui_set_bright_state(int state);
+void ui_set_relax_state(int state);
 
 #ifdef __cplusplus
 } /*extern "C"*/

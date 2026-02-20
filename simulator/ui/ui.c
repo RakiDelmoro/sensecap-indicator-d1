@@ -27,10 +27,6 @@ lv_obj_t * ui____initial_actions0;
 ///////////////////// FUNCTIONS ////////////////////
 
 // Rust FFI declarations
-extern void rust_set_bright(uint8_t state);
-extern void rust_set_relax(uint8_t state);
-extern void rust_toggle_bright(void);
-extern void rust_toggle_relax(void);
 
 ///////////////////// SCREENS ////////////////////
 

@@ -3,13 +3,9 @@
 // LVGL version: 8.3.11
 // Project name: SquareLine_Project
 
+#include <stdio.h>
 #include "../ui.h"
-
-// Rust FFI declarations
-extern void rust_set_bright(uint8_t state);
-extern void rust_set_relax(uint8_t state);
-extern void rust_toggle_bright(void);
-extern void rust_toggle_relax(void);
+#include "backend/backend.h"
 
 lv_obj_t * uic_BrightButtonPanel;
 lv_obj_t * uic_WaterLevel;
@@ -53,7 +49,7 @@ void ui_event_RelaxSwitch(lv_event_t * e)
         }
         
         // Call Rust backend to publish to MQTT
-        rust_set_relax(state);
+        backend_set_light_mode(state ? LIGHT_MODE_RELAX : LIGHT_MODE_OFF);
     }
 }
 
@@ -72,7 +68,7 @@ void ui_event_BrightSwitch(lv_event_t * e)
         }
         
         // Call Rust backend to publish to MQTT
-        rust_set_bright(state);
+        backend_set_light_mode(state ? LIGHT_MODE_BRIGHT : LIGHT_MODE_OFF);
     }
 }
 

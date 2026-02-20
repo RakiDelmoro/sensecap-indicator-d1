@@ -17,25 +17,6 @@ This firmware targets the [SenseCAP Indicator D1](https://www.seeedstudio.com/Se
 
 ![SenseCAP Indicator D1 UI](ui-display.png)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    SenseCAP Indicator D1                    │
-├─────────────────────────────────────────────────────────────┤
-│  ┌──────────────┐              ┌─────────────────────────┐   │
-│  │   ESP32-S3   │              │         RP2040         │   │
-│  │ ┌──────────┐ │   UART/SPI   │ ┌───────────────────┐  │   │
-│  │ │ C/LVGL   │ │◄────────────►│ │ Display Driver    │  │   │
-│  │ │ UI Layer │ │              │ │ Touch Controller  │  │   │
-│  │ └──────────┘ │              │ └───────────────────┘  │   │
-│  │ ┌──────────┐ │              └─────────────────────────┘   │
-│  │ │    C     │ │                                          │
-│  │ │ Backend  │ │  ┌───────────┐    ┌────────────────┐      │
-│  │ └──────────┘ │  │ 802.11    │◄──►│                │      │
-│  │              │  │ b/g/n     │    └────────────────┘      │
-│  └──────────────┘  └───────────┘                              │
-└─────────────────────────────────────────────────────────────┘
-```
-
 ## Features
 
 - **Pure C Architecture**: C/LVGL UI + C business logic
@@ -134,51 +115,6 @@ The firmware uses a pure C architecture with clear separation between UI and bus
 │  sensecap/indicator/light/state  (publish)                  │
 │  sensecap/indicator/water/level  (subscribe)                │
 └─────────────────────────────────────────────────────────────┘
-```
-
-### UI Design
-
-The interface consists of two main regions on a 480x480 circular display:
-
-```
-┌─────────────────────────────────────────┐
-│         480x480 Circular Display        │
-├─────────────────────────────────────────┤
-│                                         │
-│   ┌───────────────────────────────────┐   │
-│   │        Lights Mode Section        │   │
-│   │      (Top: y = -127, h = 211)    │   │
-│   │                                   │   │
-│   │   [Lights mode]           Yellow │   │
-│   │                                   │   │
-│   │   ┌─────────┐     ┌─────────┐    │   │
-│   │   │ Bright  │     │  Relax  │    │   │
-│   │   │  [OFF]  │────►│  [OFF]  │    │   │
-│   │   │ Switch  │     │ Switch  │    │   │
-│   │   └─────────┘     └─────────┘    │   │
-│   │      (-136)          (+139)     │   │
-│   └───────────────────────────────────┘   │
-│                [Divider]                  │
-│   ┌───────────────────────────────────┐   │
-│   │      Water Level Section          │   │
-│   │      (Bottom: y = +119, h = 219)   │   │
-│   │                                   │   │
-│   │      [Water level]        Cyan   │   │
-│   │                                   │   │
-│   │            ╭──────────╮           │   │
-│   │           ╱            ╲          │   │
-│   │          │   ┌────┐    │         │   │
-│   │          │   │ 50 │    │         │   │
-│   │          │   └────┘    │         │   │
-│   │           ╲____________╱          │   │
-│   │                                   │   │
-│   │      Arc: 180°-360° (semicircle) │   │
-│   │      Color: Blue (>20%)           │   │
-│   │              Orange (10-20%)      │   │
-│   │              Red (<10%)            │   │
-│   └───────────────────────────────────┘   │
-│                                         │
-└─────────────────────────────────────────┘
 ```
 
 #### UI Components
@@ -297,6 +233,5 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ---
 
-**Maintainer**: RakiDelmoro  
-**Version**: 1.0.0  
-**Last Updated**: 2024
+**Maintainer**: RakiDelmoro
+**Version**: 1.0.0

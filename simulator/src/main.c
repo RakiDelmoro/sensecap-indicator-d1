@@ -7,6 +7,7 @@
 #include <SDL2/SDL.h>
 #include "lvgl/lvgl.h"
 #include "ui.h"
+#include "backend/backend.h"
 
 /*Screen dimensions matching SenseCap Indicator D1 display (480x480 circular display)*/
 #define DISP_HOR_RES 480
@@ -119,13 +120,13 @@ int main(int argc, char **argv)
     indev_drv.read_cb = sdl_mouse_read;
     lv_indev_drv_register(&indev_drv);
     
-    /*Initialize Rust Backend + Mock MQTT*/
+/*Initialize C Backend + Mock MQTT*/
     printf("========================================\n");
-    printf("SenseCap Simulator with Rust Backend\n");
+    printf("SenseCap Simulator with C Backend\n");
     printf("========================================\n");
-    printf("Initializing Rust backend...\n");
-    rust_backend_init();
-    printf("Backend initialized! MockMQTT running (water level every 5s)\n");
+    printf("Initializing backend...\n");
+    backend_init();
+    printf("Backend initialized! Mock running (water level every 5s)\n");
     printf("========================================\n\n");
     
     /*Initialize the UI - this calls ui_init() which loads Screen_1*/

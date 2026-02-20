@@ -17,8 +17,6 @@ This firmware targets the [SenseCAP Indicator D1](https://www.seeedstudio.com/Se
 
 ![SenseCAP Indicator D1 UI](ui-display.png)
 
-The UI features a water tank monitor with visual arc display, toggle switches for Bright/Relax light modes, and real-time MQTT connectivity status.
-
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    SenseCAP Indicator D1                    │

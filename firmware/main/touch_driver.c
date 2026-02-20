@@ -7,9 +7,10 @@
 static const char *TAG = "TOUCH";
 
 // Touch controller pins (GT911 for SenseCAP Indicator D1)
+// From official SDK: sensecap_indicator_board.c
 #define TOUCH_I2C_NUM       I2C_NUM_0
-#define TOUCH_PIN_NUM_SDA   4
-#define TOUCH_PIN_NUM_SCL   5
+#define TOUCH_PIN_NUM_SDA   39  // GPIO_I2C_SDA
+#define TOUCH_PIN_NUM_SCL   40  // GPIO_I2C_SCL
 #define TOUCH_PIN_NUM_INT   3
 #define TOUCH_PIN_NUM_RST   2
 

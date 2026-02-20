@@ -141,6 +141,17 @@ docs/api/
 esp-idf/
 esp-matter/
 
+# --- Ignore cloned reference SDKs ---
+sensecap_indicator_esp32/
+/tmp/sensecap_indicator_esp32/
+
+# --- Ignore external component dependencies ---
+# Option 1: Fetch during build (recommended for CI/CD)
+# Option 2: Git submodule (recommended for offline builds)
+# Option 3: Keep in repo (simplest, but larger repo)
+# Uncomment below if using Option 1:
+# firmware/components/lvgl/
+
 # --- Ignore user-specific files ---
 *.user
 *.local

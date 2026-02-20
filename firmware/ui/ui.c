@@ -3,6 +3,7 @@
 // LVGL version: 8.3.11
 // Project name: SquareLine_Project
 
+#include <stdio.h>
 #include "ui.h"
 #include "ui_helpers.h"
 #include "screens/ui_Screen_1.h"

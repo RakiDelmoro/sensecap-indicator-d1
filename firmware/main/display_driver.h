@@ -2,6 +2,7 @@
 #define DISPLAY_DRIVER_H
 
 #include <stdint.h>
+#include "lvgl.h"
 
 #define DISP_HOR_RES 480
 #define DISP_VER_RES 480

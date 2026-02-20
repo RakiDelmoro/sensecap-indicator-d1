@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "lvgl.h"
 
 // Touch initialization
 void touch_init(void);

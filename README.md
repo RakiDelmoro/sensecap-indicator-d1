@@ -13,6 +13,12 @@ This firmware targets the [SenseCAP Indicator D1](https://www.seeedstudio.com/Se
 - **ESP32-S3** (240MHz, 8MB flash): Runs this firmware (ESP-IDF + C)
 - **RP2040** (133MHz, 2MB flash): Handles display/touch driver firmware
 
+### UI Preview
+
+![SenseCAP Indicator D1 UI](ui-display.png)
+
+The UI features a water tank monitor with visual arc display, toggle switches for Bright/Relax light modes, and real-time MQTT connectivity status.
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    SenseCAP Indicator D1                    │

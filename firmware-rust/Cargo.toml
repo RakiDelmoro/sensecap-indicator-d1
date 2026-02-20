@@ -30,16 +30,11 @@ heapless = "0.8"
 serde = { version = "1", default-features = false, features = ["derive"] }
 serde-json-core = "0.5"
 
-# LVGL - using C bindings for now since pure Rust LVGL is complex
-lvgl = { git = "https://github.com/lvgl/lvgl-rs", optional = true }
-lvgl-sys = { git = "https://github.com/lvgl/lvgl-rs", optional = true }
-
 [features]
 default = ["alloc", "wifi", "mqtt"]
 alloc = ["esp-idf-alloc"]
 wifi = ["esp-idf-svc/wifi"]
 mqtt = ["esp-idf-svc/mqtt"]
-lvgl-ui = ["lvgl", "lvgl-sys"]
 
 [[bin]]
 name = "sensecap-indicator-d1"

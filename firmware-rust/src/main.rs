@@ -3,7 +3,6 @@ use std::sync::Arc;
 use anyhow::Result;
 use esp_idf_svc::eventloop::EspSystemEventLoop;
 use esp_idf_svc::nvs::EspDefaultNvsPartition;
-use esp_idf_svc::timer::EspTaskTimerService;
 use log::info;
 
 mod backend;
@@ -34,7 +33,6 @@ fn main() -> Result<()> {
 
     let event_loop = EspSystemEventLoop::take()?;
     let nvs = EspDefaultNvsPartition::take()?;
-    let timer_service = EspTaskTimerService::new()?;
 
     info!("Initializing display...");
     let display = DisplayDriver::new()?;
@@ -43,7 +41,7 @@ fn main() -> Result<()> {
     let touch = TouchDriver::new()?;
 
     info!("Initializing WiFi...");
-    let wifi = WifiManager::new(
+    let _wifi = WifiManager::new(
         event_loop.clone(),
         nvs.clone(),
         &config.wifi_ssid,
@@ -61,12 +59,8 @@ fn main() -> Result<()> {
     let backend = Arc::new(std::sync::Mutex::new(Backend::new()));
 
     info!("Initializing UI...");
-    let ui = UiManager::new(
-        display,
-        touch,
-        Arc::clone(&backend),
-    )?;
+    let ui = UiManager::new(display, touch, Arc::clone(&backend))?;
 
     info!("Starting main event loop...");
-    ui.run_event_loop()
+    ui.run_event_loop(mqtt)
 }

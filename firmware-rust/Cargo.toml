@@ -31,10 +31,8 @@ serde = { version = "1", default-features = false, features = ["derive"] }
 serde-json-core = "0.5"
 
 [features]
-default = ["alloc", "wifi", "mqtt"]
+default = ["alloc", "esp-idf-svc/std"]
 alloc = ["esp-idf-alloc"]
-wifi = ["esp-idf-svc/wifi"]
-mqtt = ["esp-idf-svc/mqtt"]
 
 [[bin]]
 name = "sensecap-indicator-d1"

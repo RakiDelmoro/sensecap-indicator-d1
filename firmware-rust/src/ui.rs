@@ -1,10 +1,10 @@
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Result;
 use log::info;
 
-use crate::backend::{Backend, SharedBackend};
+use crate::backend::SharedBackend;
 use crate::display::DisplayDriver;
 use crate::mqtt::{MqttClient, MqttMessage};
 use crate::touch::{TouchDriver, TouchState};
@@ -29,7 +29,7 @@ impl UiManager {
     }
 
     /// Main event loop - runs indefinitely
-    pub fn run_event_loop(&self) -> Result<()> {
+    pub fn run_event_loop(&self, mqtt: &MqttClient) -> Result<()> {
         info!("Starting main event loop...");
 
         // This is where LVGL would be integrated
@@ -41,10 +41,10 @@ impl UiManager {
             // self.process_touch(touch_state)?;
 
             // Process MQTT messages
-            // self.process_mqtt_messages()?;
+            self.process_mqtt_messages(mqtt)?;
 
             // Update UI based on backend state
-            // self.update_ui()?;
+            self.update_ui()?;
 
             // Small delay to prevent busy-waiting
             std::thread::sleep(Duration::from_millis(10));
@@ -99,7 +99,7 @@ impl UiManager {
         info!("[UI] Updating water level display: {}%", level);
 
         // Clamp level to 0-100
-        let level = level.clamp(0, 100) as u8;
+        let _level = level.clamp(0, 100) as u8;
 
         // Update the arc value
         // lv_arc_set_value(ui_WaterTankArc, level);

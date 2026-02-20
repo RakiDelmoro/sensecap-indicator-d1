@@ -8,7 +8,7 @@ A pure C firmware for the SeeedStudio SenseCAP Indicator D1 IoT device with LVGL
 
 ## Overview
 
-This firmware targets the [SenseCAP Indicator D1](https://www.seeedstudio.com/SenseCAP-Indicator-D1-p-5642.html), a smart IoT display device featuring a 480x480 circular touchscreen. The architecture uses a **dual-core approach**:
+This firmware targets the [SenseCAP Indicator D1](https://www.seeedstudio.com/SenseCAP-Indicator-D1-p-5643.html), a smart IoT display device featuring a 480x480 circular touchscreen. The architecture uses a **dual-core approach**:
 
 - **ESP32-S3** (240MHz, 8MB flash): Runs this firmware (ESP-IDF + C)
 - **RP2040** (133MHz, 2MB flash): Handles display/touch driver firmware
@@ -227,7 +227,7 @@ MIT License - See [LICENSE](LICENSE) file for details.
 
 ## References
 
-- [SenseCAP Indicator D1 Product Page](https://www.seeedstudio.com/SenseCAP-Indicator-D1-p-5642.html)
+- [SenseCAP Indicator D1 Product Page](https://www.seeedstudio.com/SenseCAP-Indicator-D1-p-5643.html)
 - [ESP-IDF Programming Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/index.html)
 - [LVGL Documentation](https://docs.lvgl.io/8.3/)
 

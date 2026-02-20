@@ -1,0 +1,37 @@
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ESP-IDF
+build/
+sdkconfig
+sdkconfig.old
+managed_components/
+components/esptool_py/
+components/heap/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Binary files
+*.bin
+*.elf
+*.map
+*.lst

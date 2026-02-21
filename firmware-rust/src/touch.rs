@@ -1,18 +1,10 @@
-use anyhow::Result;
-use esp_idf_hal::gpio::{InputPin, OutputPin, PinDriver};
-use esp_idf_hal::i2c::{I2c, I2cConfig, I2cDriver, I2C0};
-use esp_idf_hal::peripherals::Peripherals;
-use esp_idf_hal::prelude::*;
-use esp_idf_hal::units::Hertz;
-use log::info;
+use std::sync::{Arc, Mutex};
 
-// Touch controller pins (GT911 for SenseCAP Indicator D1)
-const TOUCH_I2C_NUM: i2c_port_t = I2C_NUM_0;
-const TOUCH_PIN_NUM_SDA: gpio_num_t = GPIO_NUM_39;
-const TOUCH_PIN_NUM_SCL: gpio_num_t = GPIO_NUM_40;
-const TOUCH_PIN_NUM_INT: gpio_num_t = GPIO_NUM_3;
-const TOUCH_PIN_NUM_RST: gpio_num_t = GPIO_NUM_2;
-const TOUCH_I2C_FREQ_HZ: u32 = 400000;
+use anyhow::Result;
+use esp_idf_hal::gpio::PinDriver;
+use esp_idf_hal::i2c::I2cDriver;
+use esp_idf_hal::peripherals::Peripherals;
+use log::info;
 
 // GT911 I2C address
 const GT911_I2C_ADDR: u8 = 0x5D;
@@ -44,37 +36,36 @@ impl Default for TouchState {
 }
 
 pub struct TouchDriver {
-    i2c: I2cDriver<'static>,
+    i2c: Arc<Mutex<I2cDriver<'static>>>,
+    _reset: PinDriver<'static, esp_idf_hal::gpio::AnyOutputPin>,
+    _int: PinDriver<'static, esp_idf_hal::gpio::AnyInputPin>,
     last_state: TouchState,
 }
 
 impl TouchDriver {
-    pub fn new() -> Result<Self> {
+    pub fn new(
+        peripherals: &mut Peripherals,
+        shared_i2c: Arc<Mutex<I2cDriver<'static>>>,
+    ) -> Result<Self> {
         info!("Initializing touch hardware (GT911)");
 
-        let peripherals = Peripherals::take()?;
-
         // Configure reset and interrupt GPIOs
-        // Note: In a real implementation, we'd use PinDriver
+        let mut reset =
+            PinDriver::output(peripherals.pins.gpio2.take().expect("GPIO2 already taken"))?;
+        let int = PinDriver::input(peripherals.pins.gpio3.take().expect("GPIO3 already taken"))?;
 
         // Reset touch controller
-        // rst.set_low()?;
-        std::thread::sleep(std::time::Duration::from_millis(10));
-        // rst.set_high()?;
-        std::thread::sleep(std::time::Duration::from_millis(100));
-
-        // Initialize I2C (shared with display)
-        let i2c_config = I2cConfig::new()
-            .baudrate(Hertz(TOUCH_I2C_FREQ_HZ))
-            .sda_io_num(TOUCH_PIN_NUM_SDA)
-            .scl_io_num(TOUCH_PIN_NUM_SCL);
-
-        let i2c = I2cDriver::new(TOUCH_I2C_NUM, &i2c_config, 0)?;
+        reset.set_low()?;
+        esp_idf_hal::delay::FreeRtos::delay_ms(10);
+        reset.set_high()?;
+        esp_idf_hal::delay::FreeRtos::delay_ms(100);
 
         info!("Touch hardware initialized");
 
         Ok(TouchDriver {
-            i2c,
+            i2c: shared_i2c,
+            _reset: reset,
+            _int: int,
             last_state: TouchState::default(),
         })
     }
@@ -115,7 +106,8 @@ impl TouchDriver {
     fn gt911_read(&mut self, reg: u16, data: &mut [u8]) -> Result<()> {
         let reg_bytes = [(reg >> 8) as u8, (reg & 0xFF) as u8];
 
-        self.i2c.write_read(GT911_I2C_ADDR, &reg_bytes, data, 100)?;
+        let mut i2c = self.i2c.lock().unwrap();
+        i2c.write_read(GT911_I2C_ADDR, &reg_bytes, data, 100)?;
 
         Ok(())
     }
@@ -124,7 +116,8 @@ impl TouchDriver {
     fn gt911_write(&mut self, reg: u16, data: u8) -> Result<()> {
         let bytes = [(reg >> 8) as u8, (reg & 0xFF) as u8, data];
 
-        self.i2c.write(GT911_I2C_ADDR, &bytes, 100)?;
+        let mut i2c = self.i2c.lock().unwrap();
+        i2c.write(GT911_I2C_ADDR, &bytes, 100)?;
 
         Ok(())
     }

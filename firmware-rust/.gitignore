@@ -4,6 +4,10 @@ Cargo.lock
 **/*.rs.bk
 *.pdb
 
+# ESP-IDF build tools (embuild)
+.embuild/
+lvgl-config/
+
 # IDE
 .idea/
 .vscode/

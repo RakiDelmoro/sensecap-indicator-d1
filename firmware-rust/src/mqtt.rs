@@ -99,6 +99,24 @@ impl MqttClient {
         Ok(())
     }
 
+    pub fn try_publish_light_state(&mut self, mode: &str, state: bool) -> Result<()> {
+        let payload = format!(
+            "{{\"mode\":\"{}\",\"state\":{}}}",
+            mode,
+            if state { 1 } else { 0 }
+        );
+        info!("Publishing light state: {}", payload);
+
+        self.client.publish(
+            MQTT_TOPIC_LIGHT_STATE,
+            QoS::AtLeastOnce,
+            false,
+            payload.as_bytes(),
+        )?;
+
+        Ok(())
+    }
+
     pub fn try_recv(&self) -> Option<MqttMessage> {
         self.receiver.try_recv().ok()
     }

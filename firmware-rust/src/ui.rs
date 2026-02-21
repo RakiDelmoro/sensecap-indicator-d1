@@ -6,15 +6,18 @@ use log::info;
 
 use crate::backend::SharedBackend;
 use crate::display::DisplayDriver;
+use crate::lvgl_ui::{LvglUi, UiAction};
 use crate::mqtt::{MqttClient, MqttMessage};
-use crate::touch::{TouchDriver, TouchState};
+use crate::touch::TouchDriver;
 
 /// UI Manager handles the main event loop and coordinates
 /// between display, touch, backend, and MQTT
 pub struct UiManager {
-    _display: DisplayDriver,
-    _touch: TouchDriver,
+    display: DisplayDriver,
+    touch: TouchDriver,
     backend: SharedBackend,
+    lvgl_ui: LvglUi,
+    last_flush: std::time::Instant,
 }
 
 impl UiManager {
@@ -22,39 +25,110 @@ impl UiManager {
         info!("Initializing UI Manager");
 
         Ok(UiManager {
-            _display: display,
-            _touch: touch,
+            display,
+            touch,
             backend,
+            lvgl_ui: LvglUi::new(),
+            last_flush: std::time::Instant::now(),
         })
     }
 
     /// Main event loop - runs indefinitely
-    pub fn run_event_loop(&self, mqtt: &MqttClient) -> Result<()> {
+    pub fn run_event_loop(&mut self, mqtt: &mut MqttClient) -> Result<()> {
         info!("Starting main event loop...");
 
-        // This is where LVGL would be integrated
-        // For now, we'll use a simplified event loop
+        // Initial draw
+        self.update_ui_from_backend();
+        self.lvgl_ui.draw(&mut self.display)?;
+
+        let mut last_touch_state = false;
 
         loop {
             // Read touch input
-            // let touch_state = self.touch.read()?;
-            // self.process_touch(touch_state)?;
+            match self.touch.read() {
+                Ok(touch_state) => {
+                    if touch_state.pressed {
+                        if let Some(action) =
+                            self.lvgl_ui.handle_touch(touch_state.x, touch_state.y)
+                        {
+                            self.process_ui_action(action, mqtt)?;
+                        }
+                        last_touch_state = true;
+                    } else if last_touch_state {
+                        // Touch released
+                        last_touch_state = false;
+                    }
+                }
+                Err(e) => {
+                    log::error!("Touch read error: {:?}", e);
+                }
+            }
 
             // Process MQTT messages
-            self.process_mqtt_messages(mqtt)?;
+            if let Err(e) = self.process_mqtt_messages(mqtt) {
+                log::error!("MQTT processing error: {:?}", e);
+            }
 
-            // Update UI based on backend state
-            self.update_ui()?;
+            // Update UI from backend state
+            if let Err(e) = self.update_ui_from_backend() {
+                log::error!("UI update error: {:?}", e);
+            }
+
+            // Draw UI if needed
+            if self.lvgl_ui.needs_redraw() {
+                if let Err(e) = self.lvgl_ui.draw(&mut self.display) {
+                    log::error!("UI draw error: {:?}", e);
+                }
+            }
+
+            // Periodic flush (30 FPS)
+            let now = std::time::Instant::now();
+            if now.duration_since(self.last_flush).as_millis() >= 33 {
+                if let Err(e) = self.display.flush(0, 0, 480, 480) {
+                    log::error!("Display flush error: {:?}", e);
+                }
+                self.last_flush = now;
+            }
 
             // Small delay to prevent busy-waiting
-            std::thread::sleep(Duration::from_millis(10));
+            std::thread::sleep(Duration::from_millis(5));
         }
     }
 
-    /// Process touch events
-    fn process_touch(&self, _touch_state: TouchState) -> Result<()> {
-        // Handle touch events
-        // This would update switches, buttons, etc.
+    /// Process UI actions
+    fn process_ui_action(&mut self, action: UiAction, mqtt: &MqttClient) -> Result<()> {
+        match action {
+            UiAction::ToggleBright => {
+                info!("UI Action: Toggle Bright");
+                let mut backend = self.backend.lock().unwrap();
+                backend.toggle_bright();
+
+                // Update UI state
+                let state = backend.get_bright_state();
+                drop(backend);
+                self.lvgl_ui.set_bright_state(state);
+
+                // Publish to MQTT
+                if let Err(e) = mqtt.try_publish_light_state("bright", state) {
+                    log::error!("Failed to publish bright state: {:?}", e);
+                }
+            }
+            UiAction::ToggleRelax => {
+                info!("UI Action: Toggle Relax");
+                let mut backend = self.backend.lock().unwrap();
+                backend.toggle_relax();
+
+                // Update UI state
+                let state = backend.get_relax_state();
+                drop(backend);
+                self.lvgl_ui.set_relax_state(state);
+
+                // Publish to MQTT
+                if let Err(e) = mqtt.try_publish_light_state("relax", state) {
+                    log::error!("Failed to publish relax state: {:?}", e);
+                }
+            }
+        }
         Ok(())
     }
 
@@ -65,7 +139,7 @@ impl UiManager {
                 MqttMessage::WaterLevel(level) => {
                     let mut backend = self.backend.lock().unwrap();
                     backend.update_water_level(level);
-                    // self.update_water_level_display(level)?;
+                    info!("Water level updated from MQTT: {}%", level);
                 }
                 MqttMessage::Connected => {
                     info!("MQTT connected - UI updated");
@@ -79,63 +153,19 @@ impl UiManager {
     }
 
     /// Update UI based on current backend state
-    fn update_ui(&self) -> Result<()> {
+    fn update_ui_from_backend(&mut self) -> Result<()> {
         let backend = self.backend.lock().unwrap();
 
-        // Update bright switch state
-        let _bright_state = backend.get_bright_state();
+        // Get current states
+        let bright_state = backend.get_bright_state();
+        let relax_state = backend.get_relax_state();
+        let water_level = backend.get_water_level();
 
-        // Update relax switch state
-        let _relax_state = backend.get_relax_state();
-
-        // Update water level display
-        let _water_level = backend.get_water_level();
+        // Update LVGL UI
+        self.lvgl_ui.set_bright_state(bright_state);
+        self.lvgl_ui.set_relax_state(relax_state);
+        self.lvgl_ui.set_water_level(water_level);
 
         Ok(())
-    }
-
-    /// Set water level display (would be called from backend)
-    pub fn set_water_level(&self, level: i32) {
-        info!("[UI] Updating water level display: {}%", level);
-
-        // Clamp level to 0-100
-        let _level = level.clamp(0, 100) as u8;
-
-        // Update the arc value
-        // lv_arc_set_value(ui_WaterTankArc, level);
-
-        // Update label text
-        // lv_label_set_text(ui_WaterLevel, format!("{}", level));
-
-        // Change arc color based on level
-        // match level {
-        //     0..=10 => lv_obj_set_style_arc_color(ui_WaterTankArc, RED, ...),
-        //     11..=20 => lv_obj_set_style_arc_color(ui_WaterTankArc, ORANGE, ...),
-        //     _ => lv_obj_set_style_arc_color(ui_WaterTankArc, BLUE, ...),
-        // }
-    }
-
-    /// Set bright switch state (would be called from backend)
-    pub fn set_bright_state(&self, state: bool) {
-        info!("[UI] Setting bright state: {}", state);
-
-        // Update switch state
-        // if state {
-        //     lv_obj_add_state(ui_BrightSwitch, LV_STATE_CHECKED);
-        // } else {
-        //     lv_obj_clear_state(ui_BrightSwitch, LV_STATE_CHECKED);
-        // }
-    }
-
-    /// Set relax switch state (would be called from backend)
-    pub fn set_relax_state(&self, state: bool) {
-        info!("[UI] Setting relax state: {}", state);
-
-        // Update switch state
-        // if state {
-        //     lv_obj_add_state(ui_RelaxSwitch, LV_STATE_CHECKED);
-        // } else {
-        //     lv_obj_clear_state(ui_RelaxSwitch, LV_STATE_CHECKED);
-        // }
     }
 }

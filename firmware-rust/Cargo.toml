@@ -11,10 +11,15 @@ repository = "https://github.com/RakiDelmoro/sensecap-indicator-d1"
 opt-level = 3
 lto = "thin"
 debug = true
+panic = "abort"
 
 [profile.dev]
 debug = true
 opt-level = 0
+panic = "abort"
+
+[build-dependencies]
+embuild = { version = "0.31", features = ["espidf"] }
 
 [dependencies]
 log = "0.4"
@@ -29,6 +34,7 @@ embedded-hal-async = "1"
 heapless = "0.8"
 serde = { version = "1", default-features = false, features = ["derive"] }
 serde-json-core = "0.5"
+embedded-graphics = "0.8"
 
 [features]
 default = ["alloc", "esp-idf-svc/std"]

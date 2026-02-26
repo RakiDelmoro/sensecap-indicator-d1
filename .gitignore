@@ -29,6 +29,12 @@ firmware/managed_components/
 firmware/rust-backend/Cargo.lock
 firmware/rust-backend/target/
 
+# --- Rust ESP-IDF Build Artifacts ---
+firmware-rust/.embuild/
+firmware-rust/lvgl-config/
+firmware-rust/sdkconfig
+firmware-rust/sdkconfig.old
+
 # --- C/C++ Build Artifacts ---
 **/*.o
 **/*.a
